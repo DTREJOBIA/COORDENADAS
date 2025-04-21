@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulario con Coordenadas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .readonly {
+      background-color: #e9ecef;
+      border: 2px dashed #adb5bd;
+      color: #495057;
+      font-style: italic;
+    }
+    .completo {
+      background-color: #d4edda !important;
+      border: 2px solid #28a745 !important;
+      color: #155724 !important;
+      font-weight: bold;
+    }
+  </style>
+  <script>
+    let clientes = [];
+
+    // Carga el archivo JSON de clientes desde GitHub (actualiza la URL con la tuya)
+    fetch('https://TU_USUARIO.github.io/TU_REPOSITORIO/clientes.json')
+      .then(response => response.json())
+      .then(data => {
+        clientes = data;
+      })
+      .catch(error => {
+        alert("❌ Error al cargar la lista de clientes: " + error);
+      });
+
+    function buscarClientePorCodigo() {
+      const codigo = document.getElementById("codigo").value.trim();
+      const cliente = clientes.find(c => c.codigo === codigo);
+      const inputNombre = document.getElementById("nombre");
+
+      if (cliente) {
+        inputNombre.value = cliente.nombre;
+        inputNombre.classList.add("completo");
+      } else {
+        inputNombre.value = "";
+        inputNombre.classList.remove("completo");
+        alert("⚠️ Cliente no encontrado.");
+      }
+    }
+
+    function obtenerCoordenadas() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const latLon = position.coords.latitude + "," + position.coords.longitude;
+          const inputLat = document.getElementById("latitud");
+          inputLat.value = latLon;
+          inputLat.classList.add("completo");
+        }, function() {
+          alert("⚠️ No se pudieron obtener las coordenadas.");
+        });
+      } else {
+        alert("❌ La geolocalización no es compatible con este navegador.");
+      }
+    }
+
+    function copiarCoordenadas() {
+      const coordenadas = document.getElementById("latitud").value;
+      if (coordenadas) {
+        navigator.clipboard.writeText(coordenadas).then(() => {
+          alert("📋 ¡Coordenadas copiadas al portapapeles!");
+        }).catch((err) => {
+          alert("❌ Error al copiar las coordenadas: " + err);
+        });
+      } else {
+        alert("⚠️ No hay coordenadas para copiar.");
+      }
+    }
+
+    function enviarFormulario() {
+      const nombre = document.getElementById("nombre").value;
+      const codigo = document.getElementById("codigo").value;
+      const latLon = document.getElementById("latitud").value;
+
+      if (!nombre || !codigo || !latLon) {
+        alert("⚠️ Por favor completa todos los campos.");
+        return;
+      }
+
+      fetch('https://script.google.com/macros/s/AKfycbzTeY0pmn6tmgkZ4DHrhZveRplKm1J1b-4jY8O2vqX_Ktm8kdOtZrXj2r4y6JsdTfZQDQ/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nombre: nombre,
+          codigo: codigo,
+          latitud: latLon.split(",")[0],
+          longitud: latLon.split(",")[1]
+        })
+      })
+      .then(() => {
+        alert("✅ Datos enviados correctamente.");
+        document.getElementById("codigo").value = "";
+        document.getElementById("nombre").value = "";
+        document.getElementById("latitud").value = "";
+        document.getElementById("nombre").classList.remove("completo");
+        document.getElementById("latitud").classList.remove("completo");
+      })
+      .catch(error => {
+        alert("❌ Error al enviar los datos: " + error);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Formulario de Clientes y Coordenadas</h2>
+    <form class="shadow p-4 rounded bg-light" onsubmit="event.preventDefault(); enviarFormulario();">
+      <div class="mb-3">
+        <label for="codigo" class="form-label">Código del Cliente:</label>
+        <input type="text" class="form-control" id="codigo" required onblur="buscarClientePorCodigo()">
+      </div>
+
+      <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre del Cliente:</label>
+        <input type="text" class="form-control readonly" id="nombre" readonly>
+      </div>
+
+      <div class="mb-3">
+        <label for="latitud" class="form-label">Coordenadas (Latitud, Longitud):</label>
+        <input type="text" class="form-control readonly" id="latitud" readonly>
+      </div>
+
+      <button type="button" class="btn btn-info w-100" onclick="obtenerCoordenadas()">📍 Obtener Coordenadas</button>
+      <button type="button" class="btn btn-secondary w-100 mt-2" onclick="copiarCoordenadas()">📋 Copiar Coordenadas</button>
+      <button type="submit" class="btn btn-primary w-100 mt-3">📤 Enviar</button>
+    </form>
+  </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
