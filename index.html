@@ -56,14 +56,21 @@
     }
 
     function obtenerCoordenadas() {
+      const inputLat = document.getElementById("latitud");
+      inputLat.value = ""; // Limpia antes de obtener nuevas
+
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
           const latLon = position.coords.latitude + "," + position.coords.longitude;
-          const inputLat = document.getElementById("latitud");
           inputLat.value = latLon;
           inputLat.classList.add("completo");
-        }, function() {
-          alert("⚠️ No se pudieron obtener las coordenadas.");
+        }, function(error) {
+          alert("⚠️ No se pudieron obtener las coordenadas. Verifica que el GPS esté activo.");
+          console.error("Geolocation error:", error);
+        }, {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         });
       } else {
         alert("❌ La geolocalización no es compatible con este navegador.");
@@ -126,7 +133,7 @@
 </head>
 <body>
   <div class="container mt-5">
-    <h2 class="text-center mb-4">Actualizacion de Coordenadas</h2>
+    <h2 class="text-center mb-4">Formulario de Clientes y Coordenadas</h2>
     <form class="shadow p-4 rounded bg-light" onsubmit="event.preventDefault(); enviarFormulario();">
       <div class="mb-3">
         <label for="codigo" class="form-label">Código del Cliente:</label>
@@ -151,8 +158,8 @@
   </div>
 
   <footer>
-    <img src="ChatGPT Image 22 abr 2025 08_25_00.png" alt="Logo RTM" />
-    <p class="text-white mt-2 mb-0">© 2025 BIA HONDURAS • Todos los derechos reservados</p>
+    <img src="logo-rtm.png" alt="Logo RTM" />
+    <p class="text-white mt-2 mb-0">© 2025 RTM • Todos los derechos reservados</p>
   </footer>
 </body>
 </html>
